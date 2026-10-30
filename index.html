@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRUSTLENS | Defensive Phishing & Impersonation Triage</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="brand-wrapper">
+      <div class="brand-logo">TL</div>
+      <div>
+        <div class="brand-title">
+          TRUSTLENS
+          <span class="brand-tag">Defensive AppSec</span>
+        </div>
+        <div class="brand-subtitle">Phishing & Impersonation Defensive Triage Assistant</div>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-pill">
+        <span class="pulse-dot"></span>
+        <span>Engine Active (Zero-Execution Sandbox)</span>
+      </div>
+      <div class="status-pill" style="display: none;" id="nav-lang-pill">
+        <span id="nav-lang-text">Language: Auto</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Privacy & Defensive Principle Notice -->
+    <div class="notice-banner">
+      <div>
+        <strong>Defensive Security Principle:</strong>
+        Passive analysis only &bull; URLs defanged &bull; Missing sender info is treated as <em>UNKNOWN</em>, never proof of fraud &bull; Zero external network execution &bull; No single-keyword false alarms.
+      </div>
+      <button class="btn-test-action" onclick="document.getElementById('test-suite-section').scrollIntoView({behavior: 'smooth'})">
+        View Synthetic Benchmarks &darr;
+      </button>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="validation-alert" class="alert-error">
+      <strong>Input Validation Error:</strong> <span id="validation-error-msg">Please enter message text.</span>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Message Input Area -->
+      <section class="card" aria-label="Message Input Section">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">&xrarr;</span> Message Ingestion & Triage
+          </h2>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">INSPECT_V1.0</span>
+        </div>
+
+        <!-- Quick Preset Loader -->
+        <div class="preset-bar">
+          <div class="preset-header">
+            <span>&bull; Load Pre-configured Hackathon Benchmark Test Case:</span>
+            <span style="font-size: 0.72rem; color: var(--accent-cyan); cursor: pointer;" onclick="clearInputForm()">Clear Form</span>
+          </div>
+          <select id="preset-selector" class="preset-select" onchange="loadSelectedPreset(this.value)">
+            <option value="">-- Choose a synthetic sample (English, Hindi, Benign, Phishing, Ambiguous) --</option>
+          </select>
+        </div>
+
+        <!-- Controls: Channel & Language -->
+        <div class="controls-row">
+          <div class="form-group">
+            <label>Communication Channel</label>
+            <div class="btn-group" role="group" aria-label="Select Channel">
+              <button type="button" class="btn-toggle active" id="btn-chan-sms" onclick="setChannel('SMS')">SMS Message</button>
+              <button type="button" class="btn-toggle" id="btn-chan-email" onclick="setChannel('EMAIL')">Email Message</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Target Language</label>
+            <select id="lang-selector" class="select-styled" onchange="setLanguage(this.value)">
+              <option value="auto">Auto-Detect (English / Hindi / Hinglish)</option>
+              <option value="en">English (En)</option>
+              <option value="hi">Hindi / Hinglish (हिंदी)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Textarea Input Area -->
+        <div class="input-wrapper">
+          <label for="message-input" style="display:block; font-size: 0.8rem; font-weight:600; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
+            Raw Message Content (Paste SMS or Email)
+          </label>
+          <textarea
+            id="message-input"
+            class="message-textarea"
+            placeholder="Paste raw email body or SMS text here to inspect signals, extract evidence, defang links, and assess impersonation risk..."
+            oninput="updateCharStats()"
+          ></textarea>
+          <div class="textarea-footer">
+            <span id="input-stats">0 characters &bull; 0 words</span>
+            <span style="color: var(--accent-cyan); font-family: var(--font-mono); font-size: 0.7rem;">Passive String Inspection Only</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn-primary" id="btn-analyze" onclick="performAnalysis()">
+            <span>&sung;</span> Analyze Message
+          </button>
+          <button type="button" class="btn-secondary" onclick="clearInputForm()">
+            Clear
+          </button>
+        </div>
+
+        <!-- Passive Inspection Info -->
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-muted); line-height: 1.45;">
+          <strong>Security Assurance:</strong> TRUSTLENS will never attempt to click, resolve DNS, or send HTTP requests to links found in this message. All links are passively defanged to protect your environment.
+        </div>
+      </section>
+
+      <!-- Right Column: Risk Assessment Panel -->
+      <section class="card" aria-label="Risk Assessment Panel" id="assessment-panel">
+        
+        <!-- Empty State (Shown before analysis) -->
+        <div id="assessment-empty" class="empty-state">
+          <div class="empty-state-icon">&odot;</div>
+          <h3>Awaiting Message for Defensive Triage</h3>
+          <p>Paste an SMS or email on the left or select a sample benchmark from the dropdown to evaluate risk signals, extracted evidence, and safe verification steps.</p>
+          <div style="margin-top: 24px; display: inline-flex; gap: 8px;">
+            <span class="badge-tag badge-LOW">Low: Benign</span>
+            <span class="badge-tag badge-MEDIUM">Medium: Ambiguous</span>
+            <span class="badge-tag badge-HIGH">High: Phishing Threat</span>
+          </div>
+        </div>
+
+        <!-- Populated Assessment Results View -->
+        <div id="assessment-results" class="assessment-container">
+          
+          <!-- Risk Tier Banner -->
+          <div id="risk-banner" class="tier-banner tier-LOW">
+            <div class="tier-info-wrap">
+              <div>
+                <div id="risk-badge" class="tier-badge">LOW RISK</div>
+                <div id="risk-meta" class="tier-meta">Multi-Signal Correlation Verified</div>
+              </div>
+            </div>
+            <div class="tier-score-box">
+              <div id="risk-score-value" class="tier-score-number">10</div>
+              <div class="tier-score-label">Risk Index (0-100)</div>
+            </div>
+          </div>
+
+          <!-- Concise Narrative Explanation -->
+          <div class="narrative-card">
+            <div class="narrative-header">
+              <span>&bull;</span> Transparent Assessment Summary
+            </div>
+            <p id="assessment-narrative" class="narrative-text">Assessment description will render here.</p>
+          </div>
+
+          <!-- Sender Provenance Section -->
+          <div class="narrative-card" style="margin-bottom: 20px; border-left: 3px solid var(--accent-cyan);">
+            <div class="narrative-header" style="color: var(--text-secondary);">
+              <span>&sect;</span> Sender Provenance Status
+            </div>
+            <div id="provenance-detail" style="font-size: 0.85rem; color: var(--text-primary);">
+              Provenance evaluation loading...
+            </div>
+          </div>
+
+          <!-- Cited Textual Evidence Box -->
+          <div class="evidence-card">
+            <div class="evidence-title">
+              <span>Cited Textual Evidence from Message</span>
+              <span id="evidence-count-badge" class="defanged-badge">0 items</span>
+            </div>
+            <div id="evidence-container" class="evidence-chip-list">
+              <!-- Evidence chips dynamically injected here -->
+            </div>
+          </div>
+
+          <!-- Individual Warning Signals List -->
+          <div>
+            <div class="signals-title">Triggered Warning Signals & Evaluated Rules</div>
+            <div id="signals-list" class="signals-list">
+              <!-- Signals dynamically injected here -->
+            </div>
+          </div>
+
+          <!-- Recommended Safe Actions -->
+          <div class="recommendations-card">
+            <div class="rec-title">
+              <span>&check;</span> Recommended Safe Verification Steps
+            </div>
+            <div id="recommendations-list" class="rec-list">
+              <!-- Recommendations dynamically injected here -->
+            </div>
+          </div>
+
+          <!-- Privacy-Conscious Feedback Box -->
+          <div class="feedback-box">
+            <div class="feedback-header">
+              <span>Result Feedback & False-Alarm Challenge</span>
+              <span class="privacy-badge">&bull; Zero Raw Text Storage</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
+              Think this assessment is incorrect? Submit a challenge. Only the cryptographic fingerprint (<span id="feedback-hash-preview" style="font-family: var(--font-mono); color: var(--accent-cyan);">sha256</span>) and rule IDs are logged.
+            </p>
+            <div class="feedback-actions">
+              <button type="button" class="btn-feedback" onclick="submitFeedback('FALSE_POSITIVE')">
+                &times; Mark False Positive
+              </button>
+              <button type="button" class="btn-feedback" onclick="submitFeedback('FALSE_NEGATIVE')">
+                &excl; Mark False Negative
+              </button>
+              <button type="button" class="btn-feedback" onclick="submitFeedback('CONFIRMED')">
+                &check; Confirm Correct
+              </button>
+            </div>
+            <div id="feedback-status-msg" class="feedback-status"></div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- Interactive Test Suite & Benchmark Section -->
+    <section id="test-suite-section" class="test-section">
+      <div class="test-section-header">
+        <div>
+          <h2 class="test-section-title">
+            <span style="color: var(--accent-cyan);">&equiv;</span> Curated Synthetic Benchmark Library
+          </h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+            Reproducible test cases covering Benign, Suspicious, Ambiguous, and Hindi/English channels.
+          </p>
+        </div>
+        <div>
+          <button class="btn-primary" style="padding: 8px 16px; font-size: 0.82rem;" onclick="runAllSyntheticBenchmarks()">
+            &blacktriangleright; Run All Tests Reproducibility Audit
+          </button>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="test-table" id="benchmark-table">
+          <thead>
+            <tr>
+              <th>Test Case ID & Title</th>
+              <th>Channel</th>
+              <th>Language</th>
+              <th>Category</th>
+              <th>Expected Tier</th>
+              <th>Defensive Rationale</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="benchmark-table-body">
+            <!-- Dynamically populated from /api/samples -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Threat Model & Architecture Note -->
+    <section style="margin-top: 36px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
+      <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span style="color: var(--accent-cyan);">&sect;</span> Threat Model & Responsible Engineering Disclosure
+      </h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55;">
+        <div>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 0.9rem;">Threat Scope & Adversary Goals:</h4>
+          <p>
+            Attackers leverage multi-channel social engineering (SMS spoofing / Smishing, Spear-phishing, fake KYC updates, utility bill cut-off threats) to harvest banking credentials, OTPs, Aadhaar/PAN identity numbers, or advance clearing fees.
+          </p>
+          <p style="margin-top: 8px;">
+            Indian consumers and small businesses face bilingual and Devanagari code-mixed attacks impersonating SBI, HDFC, Income Tax, and electricity distribution companies.
+          </p>
+        </div>
+        <div>
+          <h4 style="color: var(--text-primary); margin-bottom: 6px; font-size: 0.9rem;">Defensive Guarantees:</h4>
+          <p>
+            <strong>1. No Isolated Keyword Classifications:</strong> A single word like "urgent" or "password" in routine conversation will never trigger High Risk.
+          </p>
+          <p style="margin-top: 4px;">
+            <strong>2. Passive Link Safety:</strong> Embedded URLs are defanged (e.g., <code>hxxp[://]</code>) without ever making outbound HTTP/DNS queries.
+          </p>
+          <p style="margin-top: 4px;">
+            <strong>3. Privacy-Preserving Logging:</strong> Raw message content and credentials are never stored. Challenges log only a SHA-256 fingerprint.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>TRUSTLENS &bull; PARALLAX National Hackathon 2026 &bull; BMSCE IEEE Computer Society &bull; Track 03: Identity Trust & Social Engineering</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
